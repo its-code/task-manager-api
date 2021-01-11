@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const task = require('./task')
+const courses = require('./courses')
 
 const userSchema = mongoose.Schema({
   name:{
@@ -31,6 +31,12 @@ const userSchema = mongoose.Schema({
           }
       }  
   },
+  role:{
+    type: String,
+    required: true,
+    trim: true,
+   
+  },
   age:{
     type: Number,
     default: 0
@@ -48,8 +54,8 @@ const userSchema = mongoose.Schema({
   timestamps: true
 }) 
 
-userSchema.virtual('tasks',{
-  ref: 'Tasks',
+userSchema.virtual('courses',{
+  ref: 'Courses',
   localField: '_id',
   foreignField: 'owner'
 })
@@ -115,7 +121,7 @@ userSchema.pre('save', async function(next){
 userSchema.pre('remove', async function(next){
   const user = this
 
-  await task.deleteMany({ owner: user._id})
+  await courses.deleteMany({ owner: user._id})
 
   next()
 }) 

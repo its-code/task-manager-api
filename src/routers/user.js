@@ -2,7 +2,6 @@ const express = require('express')
 const auth = require('../middleware/auth')
 const user = require("../models/user")
 const sharp = require('sharp')
-const { sendWelcomeEmail, sendFairwellEmail } = require('../emails/account')
 const router = new express.Router() 
 const multer = require('multer')
 
@@ -13,7 +12,6 @@ router.post('/users',async (req,res)=>{
     const me = new user(req.body)
     try{
       await me.save()
-      sendWelcomeEmail(me.email,me.name)
       const token = await me.generateAuthToken()
       res.status(201).send({me,token})  
     }catch(e){
@@ -28,7 +26,7 @@ router.post('/users/login',async (req,res) =>{
 
         res.send({userAuth, token})
     }catch(e){
-        res.send(e)
+        res.status(400).send(e)
     }    
 })
 
@@ -98,7 +96,7 @@ router.patch('/users/me', auth ,async (req,res)=>{
             req.user[update] = req.body[update]
         })
 
-        await req.user.save()  
+      await req.user.save()  
       res.send(req.user)
     }catch(e){
         res.status(400).send(e)
@@ -107,8 +105,8 @@ router.patch('/users/me', auth ,async (req,res)=>{
 
 router.delete('/users/me',auth ,async (req,res)=>{
     try{
-        req.user.remove()
-        sendFairwellEmail(req.user.email,req.user.name)
+        await req.user.remove()
+        //sendFairwellEmail(req.user.email,req.user.name)
         res.send(req.user)
     }catch(e){
         res.status(400).send(e)
